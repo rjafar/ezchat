@@ -19,20 +19,55 @@ firebase.initializeApp({
   measurementId: "G-HVVJ4J7NEW"
 })
 
+// global firebase variables
 const auth = firebase.auth();
 const firestore = firebase.firestore();
 
-
 function App() {
+  // checks if user is logged in (authenticated) or null
+  const [user] = useAuthState(auth);
+
   return (
     <div className="App">
       <header>
-
+        <h1>
+          ezchat
+        </h1>
+        <SignOut />
       </header>
 
-      
+      <section>
+        {user ? <Chat /> : <SignIn />}
+      </section>
+
     </div>
   );
+}
+
+// functional components
+// SignIn allows user to provide Google credentials to authenticate
+function SignIn() {
+  const signInGoogle = () => {
+    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(googleAuthProvider);
+  }
+
+  return (
+    <button className="signInButton" onClick={signInGoogle}>Sign in with Google</button>
+  )
+}
+
+function SignOut() {
+  // check to see if currentUser is valid so we can sign them out
+  return auth.currentUser && (
+    <button className="signOutButton" onClick={auth.signOut()}>Sign Out</button>
+  )
+}
+
+
+
+function Chat () {
+
 }
 
 export default App;

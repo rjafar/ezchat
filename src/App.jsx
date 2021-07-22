@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import './App.css';
+import {SignIn, SignOut} from './Authenticate';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
@@ -37,36 +38,16 @@ function App() {
         <h1>
           ezchat
         </h1>
-        <SignOut />
+        <SignOut auth={auth}/>
       </header>
 
       <section>
-        {user ? <Chat /> : <SignIn />}
+        {user ? <Chat /> : <SignIn auth={auth} />}
       </section>
 
     </div>
   );
 }
-
-// SignIn allows user to provide Google credentials to authenticate
-function SignIn() {
-  const signInGoogle = () => {
-    const googleAuthProvider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(googleAuthProvider);
-  }
-
-  return (
-    <button className="signInButton" onClick={() => signInGoogle()}>Sign in with Google</button>
-  )
-}
-
-function SignOut() {
-  // check to see if currentUser is valid so we can sign them out
-  return auth.currentUser && (
-    <button className="signOutButton" onClick={() => auth.signOut()}>Sign Out</button>
-  )
-}
-
 
 // functional component for main chat room
 function Chat () {
@@ -81,6 +62,7 @@ function Chat () {
 
   // firebase hook that listens to new data coming in and returns array of message objects from DB
   const [messages] = useCollectionData(query, {idField: 'id'});
+  console.log(messages);
 
   // keeps track of updated messages being written in form text box
   const [formInput, setFormInput] = useState('');
@@ -125,15 +107,17 @@ function Chat () {
 
 
 function ChatMessage(props) {
-  const { text, uid, photoURL } = props.message;
-
+  console.log(props)
+  const { text, uid, photoURL, /*createdAt*/ } = props.message;
+  // const date = Date(createdAt);
   // check to see who message is from by comparing user id
   const messageStyle = uid === auth.currentUser.uid ? 'sent' : 'received';
   
   return (
-    <div className={`${messageStyle}`}>
+    <div className={`message ${messageStyle}`}>
       <img src={photoURL || 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350' } alt=""/>
       <p>{text}</p>
+      {/* <div className="date">{date}</div> */}
     </div>
   )
 }

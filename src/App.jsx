@@ -62,7 +62,6 @@ function Chat () {
 
   // firebase hook that listens to new data coming in and returns array of message objects from DB
   const [messages] = useCollectionData(query, {idField: 'id'});
-  console.log(messages);
 
   // keeps track of updated messages being written in form text box
   const [formInput, setFormInput] = useState('');
@@ -107,19 +106,25 @@ function Chat () {
 
 
 function ChatMessage(props) {
-  console.log(props)
-  const { text, uid, photoURL, /*createdAt*/ } = props.message;
-  // const date = Date(createdAt);
+  const { text, uid, photoURL, createdAt } = props.message;
+  const date = createdAt && createdAt.toDate().toDateString();
+  const time = createdAt && createdAt.toDate().toLocaleTimeString('en-US')
   // check to see who message is from by comparing user id
   const messageStyle = uid === auth.currentUser.uid ? 'sent' : 'received';
   
   return (
     <div className={`message ${messageStyle}`}>
       <img src={photoURL || 'https://images.pexels.com/photos/20787/pexels-photo.jpg?auto=compress&cs=tinysrgb&h=350' } alt=""/>
-      <p>{text}</p>
-      {/* <div className="date">{date}</div> */}
+      <div>
+      <div className="date">{date}</div>
+      <div className="time">{time}</div>
+      <p>
+        {text}
+      </p>
+      </div>
+
     </div>
   )
-}
+  }
 
 export default App;

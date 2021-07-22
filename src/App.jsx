@@ -71,22 +71,65 @@ function Chat () {
     // stop page from refreshing after form submitted
     e.preventDefault();
 
-    // get user info from current user
-    const { uid, photoURL } = auth.currentUser;
+    // command input
+    if (formInput[0] === "/") {
+      if (formInput.indexOf("signMeOut") !== -1) {
+        signMeOut();
+      }
 
-    // write to DB
-    await messagesDB.add({
-      text: formInput,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-      uid,
-      photoURL
-    })
+      if (formInput.indexOf("roll") !== -1) {
+        const roll = formInput.split(" ");
+
+        if (roll[1] > 0) {
+          const randomNum = rollDice(roll[1]);
+          writeToDB(randomNum);
+        }
+        else {
+          console.log("Roll integer must be greater than 0");
+        }
+      }
+
+      if (formInput.indexOf("welcome") !== -1) {
+        const str = formInput.substring(1,formInput.length);
+        writeToDB(str);
+      }
+    }
+
+    else {
+      writeToDB();
+    }
 
     // reset formInput state
     setFormInput('');
 
     lastMsgRef.current.scrollIntoView({ behavior: 'smooth' });
   }
+
+  const writeToDB = async(content) => {
+      // get user info from current user
+      const { uid, photoURL } = auth.currentUser;
+
+      if (!content) {
+        content = formInput;
+      }
+
+      // write to DB
+      await messagesDB.add({
+        text: content,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        uid,
+        photoURL
+    });
+  };
+
+  const signMeOut = () => {
+    auth.signOut();
+  };
+
+  const rollDice = (e) => {
+    const randomNum = (Math.floor(Math.random() * e)) + 1
+    return randomNum;
+  };
 
   // map over array of messages
   // for each message, create a ChatMessage component with props key and message
